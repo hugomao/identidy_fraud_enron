@@ -1,0 +1,91 @@
+Question 1: Summarize for us the goal of this project and how machine learning is useful in trying to accomplish it. As part of your answer, give some background on the dataset and how it can be used to answer the project question. Were there any outliers in the data when you got it, and how did you handle those?
+
+The goal of this project is to use financial and email data from Enron corpus to come up with a predictive model that help to predict an individual as a "Person of Interest (POI). 
+Enron was among Fortune 500 in U.S in 2000. By 2002, it collapsed due to corporate fraud resulting from Federal Investigation, there was thousands of records (e-mail & financial data). Most notable of which are Jefferey Skilling, Key Lay, and Fastow all have dumped large amounts of stock options, and they are all deemed guilty.
+For the data itself, it contained 146 records and 20 features(14 financial features, 6 email feature).
+The dataset has 3 outlier, one is total,which should be removed.For the other two didn't remove because i/m not sure if there're typing errors.
+For missing value, i found for many features:
+
+
+bonus                         64.0
+deferral_payments            107.0
+deferred_income               97.0
+director_fees                129.0
+email_address                 35.0
+exercised_stock_options       44.0
+expenses                      51.0
+from_messages                 60.0
+from_poi_to_this_person       60.0
+from_this_person_to_poi       60.0
+loan_advances                142.0
+long_term_incentive           80.0
+other                         53.0
+restricted_stock              36.0
+restricted_stock_deferred    128.0
+salary                        51.0
+shared_receipt_with_poi       60.0
+to_messages                   60.0
+total_payments                21.0
+total_stock_value             20.0
+
+Basically i simply fill the NAs using 0. 
+
+
+
+
+Question 2: What features did you end up using in your POI identifier, and what selection process did you use to pick them? Did you have to do any scaling? Why or why not? As part of the assignment, you should attempt to engineer your own feature that does not come ready-made in the dataset -- explain what feature you tried to make, and the rationale behind it.
+
+I used sklearn SelectKBest to select features. For each algorithm, i used this method and tuned number of features selected by comparing cross validation score and select the number with highest score. 
+I added 3 features: fraction_from_poi,fraction_to_poi,payments_stock_total
+My assumption is: If the percentage of emails from POI or to POI is high, that person is also more likely to be POI. 
+
+After feature engineering, I scaled all features using min-max scalers because different variables have really different scales and when doing regressions, difference scales will impact the significance of each variable, thus causing incorrect result. 
+
+
+Question 3: What algorithm did you end up using? What other one(s) did you try? How did model performance differ between algorithms?
+
+I tried 3 popular algos: Random Forest Classifer, Support Vector Machine & Logistic Regression.
+For each algorithm, i tuned the parameters inside as well as the number of features selected using selectedK.
+
+Post-tuning CV result is summarized as tabel below:
+We can see that Logistic regression has the highest precision while SVM has the highest coverage.They are both better than random forest.
+
+
+Algorithm	               Precision	Recall   f1
+Logistic Regression	           0.43  	0.30    0.35
+Support Vector Classifier	   0.30 	0.58    0.40
+Random Forest Classifier	   0.50 	0.29     0.37
+
+
+I ended up using the SVM because it has a higher f1 score
+
+
+Question 4: What does it mean to tune the parameters of an algorithm, and what can happen if you don’t do this well? How did you tune the parameters of your particular algorithm?
+
+
+Parameters tuning is very important for improving the fit on the test set. Parameter can influence the result of the learning process, the more tuned the parameters, the closer the model is to the best estimator. But it can also lead to overfit or underfit if you dont tune your parameters properly.
+
+With every algorithms, I tried to tune as much as I could inor der to make it more accurate. Here're the parameters i tuned:
+
+Logistic regression: C (inverse regularization),K(k best features). 
+
+SVM:C(Penalty parameter),G(Kernel coefficient for ‘rbf’, ‘poly’ and ‘sigmoid’),K(k best features)
+
+Random Forest: max_depth,n_estimators,K(k best features)
+
+
+
+Question 5:What is validation, and what’s a classic mistake you can make if you do it wrong? How did you validate your analysis?
+
+Validation is performed to ensure that a machine learning algorithm generalizes well. A classic mistake is over-fitting, where the model is trained and performs very well on the training dataset, but markedly worse on the cross-validation and test datasets. The way i do validation is as follows:
+                        For each iteration:
+                                Split data into training(67%) and validation(33%).
+                                train model on the training set.
+                                Calculate the val score based on the validation set.
+                        Compute mean error of all iterations as my validation error
+                                
+
+Question 6:Give at least 2 evaluation metrics, and your average performance for each of them. Explain an interpretation of your metrics that says something human-understandable about your algorithm's performance
+
+For this assignment, I used precision & recall & f1 score as 3 main evaluation metrics. The best performance belongs to SVM (precision: 0.30 & recall: 0.58 & f1 score: 0.40) which is also the final model of choice.
+Precision tells us, of those you predict as POI, what percentage did you predict correctly. Recall tells us, of those who are POIs, what percentage you predict as POIs, which indicate the coverage of your prediction. The result above tells us that, we covered 58% of real POIs in our predition and predicted them as POI. However of all predicted POIs, only 30% are predicted correctly.
